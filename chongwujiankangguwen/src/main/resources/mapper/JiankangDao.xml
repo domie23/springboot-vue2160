@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.JiankangDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.guwen_id as guwenId
+        ,a.jiankang_name as jiankangName
+        ,a.jiankang_uuid_number as jiankangUuidNumber
+        ,a.jiankang_photo as jiankangPhoto
+        ,a.jiankang_types as jiankangTypes
+        ,a.jiankang_video as jiankangVideo
+        ,a.jiankang_file as jiankangFile
+        ,a.jiankang_content as jiankangContent
+        ,a.jiankang_delete as jiankangDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.JiankangView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,guwen.guwen_name as guwenName
+        ,guwen.guwen_phone as guwenPhone
+        ,guwen.guwen_id_number as guwenIdNumber
+        ,guwen.guwen_photo as guwenPhoto
+        ,guwen.guwen_email as guwenEmail
+
+        FROM jiankang  a
+        left JOIN guwen guwen ON a.guwen_id = guwen.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.guwenId != null and params.guwenId != ''">
+                and (
+                    a.guwen_id = #{params.guwenId}
+                )
+            </if>
+            <if test=" params.jiankangName != '' and params.jiankangName != null and params.jiankangName != 'null' ">
+                and a.jiankang_name like CONCAT('%',#{params.jiankangName},'%')
+            </if>
+            <if test=" params.jiankangUuidNumber != '' and params.jiankangUuidNumber != null and params.jiankangUuidNumber != 'null' ">
+                and a.jiankang_uuid_number like CONCAT('%',#{params.jiankangUuidNumber},'%')
+            </if>
+            <if test="params.jiankangTypes != null and params.jiankangTypes != ''">
+                and a.jiankang_types = #{params.jiankangTypes}
+            </if>
+            <if test=" params.jiankangVideo != '' and params.jiankangVideo != null and params.jiankangVideo != 'null' ">
+                and a.jiankang_video like CONCAT('%',#{params.jiankangVideo},'%')
+            </if>
+            <if test=" params.jiankangContent != '' and params.jiankangContent != null and params.jiankangContent != 'null' ">
+                and a.jiankang_content like CONCAT('%',#{params.jiankangContent},'%')
+            </if>
+            <if test="params.jiankangDeleteStart != null and params.jiankangDeleteStart != ''">
+                <![CDATA[  and a.jiankang_delete >= #{params.jiankangDeleteStart}   ]]>
+            </if>
+            <if test="params.jiankangDeleteEnd != null and params.jiankangDeleteEnd != ''">
+                <![CDATA[  and a.jiankang_delete <= #{params.jiankangDeleteEnd}   ]]>
+            </if>
+             <if test="params.jiankangDelete != null and params.jiankangDelete != ''">
+                and a.jiankang_delete = #{params.jiankangDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断顾问的id不为空 -->
+            <if test=" params.guwenIdNotNull != '' and params.guwenIdNotNull != null and params.guwenIdNotNull != 'null' ">
+                and a.guwen_id IS NOT NULL
+            </if>
+            <if test=" params.guwenName != '' and params.guwenName != null and params.guwenName != 'null' ">
+                and guwen.guwen_name like CONCAT('%',#{params.guwenName},'%')
+            </if>
+            <if test=" params.guwenPhone != '' and params.guwenPhone != null and params.guwenPhone != 'null' ">
+                and guwen.guwen_phone like CONCAT('%',#{params.guwenPhone},'%')
+            </if>
+            <if test=" params.guwenIdNumber != '' and params.guwenIdNumber != null and params.guwenIdNumber != 'null' ">
+                and guwen.guwen_id_number like CONCAT('%',#{params.guwenIdNumber},'%')
+            </if>
+            <if test=" params.guwenEmail != '' and params.guwenEmail != null and params.guwenEmail != 'null' ">
+                and guwen.guwen_email like CONCAT('%',#{params.guwenEmail},'%')
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
